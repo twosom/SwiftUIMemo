@@ -11,6 +11,8 @@ struct ComposeScene: View {
     @State
     private var content: String = ""
 
+    @Binding
+    var showComposer: Bool
 
     var body: some View {
         NavigationView {
@@ -18,22 +20,36 @@ struct ComposeScene: View {
                 TextField("", text: $content)
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
                     .navigationBarTitle("새 메모", displayMode: .inline)
-                    .navigationBarItems(leading: DismissButton(), trailing: SaveButton())
+                    .navigationBarItems(
+                            leading: DismissButton(show: $showComposer),
+                            trailing: SaveButton(show: $showComposer))
         }
     }
 }
 
 fileprivate struct SaveButton: View {
+
+    @Binding
+    var show: Bool
+
     var body: some View {
-        Button(action: {}, label: {
+        Button(action: {
+            self.show = false
+        }, label: {
             Text("저장")
         })
     }
 }
 
 fileprivate struct DismissButton: View {
+
+    @Binding
+    var show: Bool
+
     var body: some View {
-        Button(action: {}, label: {
+        Button(action: {
+            self.show = false
+        }, label: {
             Text("취소")
         })
     }
@@ -41,7 +57,7 @@ fileprivate struct DismissButton: View {
 
 class ComposeScene_Previews: PreviewProvider {
     static var previews: some View {
-        ComposeScene()
+        ComposeScene(showComposer: .constant(false))
                 .environmentObject(MemoStore())
     }
 
