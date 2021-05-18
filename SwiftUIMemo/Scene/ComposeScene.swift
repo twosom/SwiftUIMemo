@@ -18,6 +18,8 @@ struct ComposeScene: View {
     @Binding
     var showComposer: Bool
 
+    var memo: Memo? = nil
+
     var body: some View {
         NavigationView {
             VStack {
@@ -25,13 +27,15 @@ struct ComposeScene: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.bottom, 0)
                         .animation(.easeInOut(duration: keyboard.context.animationDuration))
-                        .background(Color.yellow)
+//                        .background(Color.yellow)
 
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .navigationBarTitle("새 메모", displayMode: .inline)
+                    .navigationBarTitle(memo != nil ? "메모 편집" : "새 메모", displayMode: .inline)
                     .navigationBarItems(
                             leading: DismissButton(show: $showComposer),
-                            trailing: SaveButton(show: $showComposer, content: $content))
+                            trailing: SaveButton(show: $showComposer, content: $content, memo: memo))
+        }.onAppear {
+            self.content = memo?.content ?? ""
         }
     }
 }
@@ -47,10 +51,16 @@ fileprivate struct SaveButton: View {
     @Binding
     var content: String
 
+    var memo: Memo? = nil
+
 
     var body: some View {
         Button(action: {
-            self.store.insert(memo: self.content)
+            if let memo = memo {
+                store.update(memo: memo, content: content)
+            } else {
+                store.insert(memo: content)
+            }
 
             self.show = false
         }, label: {
@@ -73,12 +83,14 @@ fileprivate struct DismissButton: View {
     }
 }
 
-class ComposeScene_Previews: PreviewProvider {
+struct ComposeScene_Previews: PreviewProvider {
     static var previews: some View {
         ComposeScene(showComposer: .constant(false))
                 .environmentObject(MemoStore())
                 .environmentObject(KeyboardObserver())
     }
+
+
 }
 
 
